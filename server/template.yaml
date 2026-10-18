@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: GrantLoom backend — S3 documents, Textract, Bedrock, PostgreSQL (RDS), scheduled reminders.
+
+Parameters:
+  DatabaseSecretArn: { Type: String, Description: Secrets Manager secret holding DATABASE_URL }
+  HubSpotSecretArn: { Type: String }
+  VpcSubnetIds: { Type: 'List<AWS::EC2::Subnet::Id>' }
+  LambdaSecurityGroupId: { Type: 'AWS::EC2::SecurityGroup::Id' }
+  CognitoIssuer: { Type: String }
+  CognitoAudience: { Type: String }
+  AppUrl: { Type: String }
+  ReminderFrom: { Type: String }
+  BedrockModelId: { Type: String, Default: anthropic.claude-opus-5-5 }
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures: [arm64]
+    MemorySize: 512
+    Timeout: 60
+    CodeUri: dist/
+    VpcConfig: { SubnetIds: !Ref VpcSubnetIds, SecurityGroupIds: [!Ref LambdaSecurityGroupId] }
+    Environment:
+      Variables:
+        DATABASE_URL: !Sub '{{resolve:secretsmanager:${DatabaseSecretArn}:SecretString:url}}'
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        APP_URL: !Ref AppUrl
+
+Resources:
+  DocumentsKey:
+    Type: AWS::KMS::Key
+    Properties: { EnableKeyRotation: true, KeyPolicy: { Version: '2012-10-17', Statement: [{ Effect: Allow, Principal: { AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root' }, Action: 'kms:*', Resource: '*' }] } }
+
+  DocumentsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration: { Status: Enabled }
+      BucketEncryption: { ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: aws:kms, KMSMasterKeyID: !Ref DocumentsKey } }] }
+      PublicAccessBlockConfiguration: { BlockPublicAcls: true, BlockPublicPolicy: true, IgnorePublicAcls: true, RestrictPublicBuckets: true }
+      ObjectLockEnabled: true   # evidence retention for audits
+      LifecycleConfiguration: { Rules: [{ Id: ia, Status: Enabled, Transitions: [{ StorageClass: STANDARD_IA, TransitionInDays: 90 }] }] }
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Auth:
+        DefaultAuthorizer: Cognito
+        Authorizers: { Cognito: { IdentitySource: $request.header.Authorization, JwtConfiguration: { issuer: !Ref CognitoIssuer, audience: [!Ref CognitoAudience] } } }
+
+  ExtractRequirementsFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/extract-requirements.handler
+      Timeout: 900
+      Policies:
+        - S3ReadPolicy: { BucketName: !Ref DocumentsBucket }
+        - Statement: [{ Effect: Allow, Action: ['textract:StartDocumentTextDetection', 'textract:GetDocumentTextDetection'], Resource: '*' },
+                      { Effect: Allow, Action: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'], Resource: '*' },
+                      { Effect: Allow, Action: ['kms:Decrypt'], Resource: !GetAtt DocumentsKey.Arn }]
+      Events:
+        Agreement: { Type: S3, Properties: { Bucket: !Ref DocumentsBucket, Events: s3:ObjectCreated:*, Filter: { S3Key: { Rules: [{ Name: prefix, Value: org/ }, { Name: suffix, Value: .pdf }] } } } }
+
+  AnalyzeReceiptFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/analyze-receipt.handler
+      Policies:
+        - S3ReadPolicy: { BucketName: !Ref DocumentsBucket }
+        - Statement: [{ Effect: Allow, Action: ['textract:AnalyzeExpense'], Resource: '*' }, { Effect: Allow, Action: ['kms:Decrypt'], Resource: !GetAtt DocumentsKey.Arn }]
+      # Wire an EventBridge rule on S3 "Object Created" for the evidence/ prefix (S3 allows one notification per overlapping prefix).
+
+  DraftReportFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/draft-report.handler
+      Timeout: 300
+      Policies:
+        - Statement: [{ Effect: Allow, Action: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'], Resource: '*' }]
+      Events:
+        Draft: { Type: HttpApi, Properties: { ApiId: !Ref Api, Method: POST, Path: /reports/{id}/draft } }
+
+  RemindersFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/reminders.handler
+      Environment: { Variables: { REMINDER_FROM: !Ref ReminderFrom } }
+      Policies:
+        - Statement: [{ Effect: Allow, Action: ['ses:SendEmail'], Resource: '*' }]
+      Events:
+        Daily: { Type: ScheduleV2, Properties: { ScheduleExpression: 'cron(0 7 * * ? *)', ScheduleExpressionTimezone: UTC } }
+
+  DemoRequestFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/demo-request.handler
+      VpcConfig: { SubnetIds: [], SecurityGroupIds: [] }  # public internet only; no DB access
+      Environment:
+        Variables:
+          HUBSPOT_TOKEN: !Sub '{{resolve:secretsmanager:${HubSpotSecretArn}:SecretString:token}}'
+          HS_DEMO_PIPELINE: '{{resolve:ssm:/grantloom/hubspot/demo_pipeline}}'
+          HS_DEMO_STAGE_NEW: '{{resolve:ssm:/grantloom/hubspot/demo_stage_new}}'
+      Events:
+        Form: { Type: HttpApi, Properties: { ApiId: !Ref Api, Method: POST, Path: /public/demo-request, Auth: { Authorizer: NONE } } }
+
+Outputs:
+  ApiUrl: { Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com' }
+  DocumentsBucketName: { Value: !Ref DocumentsBucket }

@@ -1,0 +1,53 @@
+.shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; }
+.side { background: var(--green-900); color: #c9d8cf; padding: 18px 12px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.side .grp { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: #7f9b8d; margin: 18px 10px 6px; }
+.side a { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; border-radius: 7px; color: #d6e2db; text-decoration: none; font-size: 14px; }
+.side a:hover { background: #ffffff10; }
+.side a.active { background: var(--green-700); color: #fff; box-shadow: inset 2px 0 0 var(--gold); }
+.side .count { font-size: 11px; background: var(--red); color: #fff; border-radius: 999px; padding: 0 7px; }
+.main { min-width: 0; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 28px; border-bottom: 1px solid var(--line); background: #fffdf8; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
+.content { padding: 28px; max-width: 1280px; }
+.menu-btn { display: none; }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .draft { padding: 20px 16px; }
+  .topbar select, .content select.input { max-width: calc(100vw - 32px); min-width: 0; }
+  .msg { max-width: 100%; }
+  .side { position: fixed; z-index: 40; width: 250px; left: -260px; transition: left .2s; }
+  .side.open { left: 0; }
+  .menu-btn { display: inline-flex; }
+  .content { padding: 18px 16px; }
+  .topbar { padding: 10px 16px; }
+}
+
+.doc-view { background: #fffefb; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 26px; font-family: var(--serif); font-size: 14.5px; max-height: 70vh; overflow: auto; }
+.doc-view .cl { padding: 8px 10px; border-radius: 6px; margin: 0 -10px 6px; transition: background .2s; }
+.doc-view .cl.hl { background: var(--gold-soft); }
+.doc-view .ref { font-family: var(--sans); font-size: 11px; color: var(--muted); }
+
+.draft { background: #fffefb; border: 1px solid var(--line); border-radius: var(--radius); padding: 32px 36px; font-family: var(--serif); font-size: 15px; line-height: 1.7; }
+.draft h4 { font-size: 1.05rem; margin: 1.6em 0 .5em; }
+.draft table { font-family: var(--sans); font-size: 13px; margin: 10px 0; }
+.watermark { font-family: var(--sans); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; color: var(--red); border: 1px solid var(--red); border-radius: 4px; padding: 2px 8px; display: inline-block; }
+
+.chat { display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: 82%; padding: 12px 14px; border-radius: 12px; white-space: pre-wrap; font-size: 14px; }
+.msg.q { align-self: flex-end; background: var(--green-800); color: var(--ivory); border-bottom-right-radius: 3px; }
+.msg.a { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 3px; }
+.msg.a.refused { border-color: #e8d29c; background: var(--amber-soft); }
+
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.cal > div { background: #fff; min-height: 86px; padding: 6px; font-size: 12px; }
+.cal .dow { min-height: auto; background: var(--ivory-2); font-weight: 600; color: var(--muted); text-align: center; }
+.cal .off { background: #fbf9f4; color: #b9b3a5; }
+.cal .today { box-shadow: inset 0 0 0 2px var(--gold); }
+.cal .ev { display: block; border-radius: 4px; padding: 1px 5px; margin-top: 3px; font-size: 11px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal .ev.report { background: #e3e7f0; color: var(--navy); }
+.cal .ev.milestone { background: var(--green-100); color: var(--green-800); }
+.cal .ev.overdue { background: var(--red-soft); color: var(--red); }
+
+.steps { display: flex; gap: 8px; flex-wrap: wrap; }
+.steps .st { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--ivory-2); color: var(--muted); }
+.steps .st.on { background: var(--green-800); color: #fff; }
+.steps .st.done { background: var(--ok-soft); color: var(--ok); }

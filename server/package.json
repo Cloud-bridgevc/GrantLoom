@@ -1,0 +1,23 @@
+{
+  "name": "grantloom-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.35.0",
+    "@aws-sdk/client-s3": "^3.650.0",
+    "@aws-sdk/client-sesv2": "^3.650.0",
+    "@aws-sdk/client-textract": "^3.650.0",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.7.0",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.6.3"
+  }
+}
