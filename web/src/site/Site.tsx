@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Logo } from '../components/ui';
 import { useStore } from '../engine/store';
 import EvidenceDemo from './EvidenceDemo';
+import { GlowTop, GlowMid, GlowEnd } from './Glow';
 
 const FEATURES = [
   ['Requirement extraction', 'Upload a grant agreement. GrantLoom extracts reporting obligations, eligible costs, deadlines, milestones and evidence rules — each tied to its clause and page, and queued for human review.'],
@@ -41,7 +42,23 @@ const PLANS = [
 ];
 
 export default function Site() {
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => {
+    // In-page anchors (#pricing) must scroll, not change the hash route.
+    const id = location.hash.slice(1);
+    if (id && !id.startsWith('/')) document.getElementById(id)?.scrollIntoView();
+    else window.scrollTo(0, 0);
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+      const target = a?.getAttribute('href')?.slice(1);
+      if (!a || !target || target.startsWith('/')) return;
+      const el = document.getElementById(target);
+      if (!el) return;
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth' });
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, []);
   const [tab, setTab] = useState<keyof typeof USE_CASES>('NGO');
   const uc = USE_CASES[tab];
   return (
@@ -50,10 +67,12 @@ export default function Site() {
         <div className="wrap">
           <Logo />
           <nav>
+            <a href="#problem">Problem</a>
             <a href="#features">Platform</a>
             <a href="#use-cases">Use cases</a>
             <a href="#demo">Evidence mapping</a>
             <a href="#pricing">Pricing</a>
+            <a href="#team">Team</a>
           </nav>
           <div className="row">
             <Link to="/app" className="btn btn-ghost btn-sm">Open live demo</Link>
@@ -88,6 +107,8 @@ export default function Site() {
         </div>
       </section>
 
+      <GlowTop />
+
       <section className="section alt" id="features">
         <div className="wrap">
           <div className="section-head">
@@ -120,6 +141,8 @@ export default function Site() {
           </div>
         </div>
       </section>
+
+      <GlowMid />
 
       <section className="section" id="use-cases">
         <div className="wrap">
@@ -176,6 +199,8 @@ export default function Site() {
         </div>
       </section>
 
+      <GlowEnd />
+
       <section className="section alt" id="request">
         <div className="wrap" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.2fr)', gap: 48 }}>
           <div>
@@ -194,7 +219,7 @@ export default function Site() {
       <footer className="site-footer">
         <div className="wrap spread">
           <Logo light />
-          <span>© 2026 GrantLoom. All demo organizations, people and figures are fictional.</span>
+          <span>© 2026 GrantLoom · grantloom.site · Founded by Ngozi Okafor (Founder/CEO) &amp; Ibrahim Musa (Co-founder/CTO) · <Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link>. All demo organizations, people and figures are fictional.</span>
         </div>
       </footer>
       <style>{`@media (max-width: 860px){ #request .wrap{ grid-template-columns: 1fr !important; } }`}</style>

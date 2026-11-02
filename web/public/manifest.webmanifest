@@ -1,0 +1,21 @@
+{
+  "name": "GrantLoom",
+  "short_name": "GrantLoom",
+  "description": "Grant management, compliance coordination and funder reporting with visible source references.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d6b53",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

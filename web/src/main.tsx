@@ -6,6 +6,7 @@ import './site/site.css';
 import './app/app.css';
 import { StoreProvider } from './engine/store';
 import Site from './site/Site';
+import Legal from './site/Legal';
 import AppShell from './app/AppShell';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -15,6 +16,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/" element={<Site />} />
           <Route path="/app/*" element={<AppShell />} />
+          <Route path="/privacy" element={<Legal kind="privacy" />} />
+          <Route path="/terms" element={<Legal kind="terms" />} />
+          <Route path="*" element={<Site />} />
         </Routes>
       </HashRouter>
     </StoreProvider>
