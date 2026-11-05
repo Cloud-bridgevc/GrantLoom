@@ -49,7 +49,7 @@ Everything in the demo is fictional: Riverbend Community Health Collective, thre
 - Website (`web/`): problem section with three sourced statistics, what-we-solve, comparison table, AI section, founder cards, roadmap and FAQ, with scroll-reveal motion that respects reduced motion. Sections live in `web/src/site/Glow.tsx` (generated markup); styles and motion in `web/public/glow.css` and `web/public/glow.js`.
 - Fixed: clicking the site's in-page nav links (e.g. “Pricing”) changed the hash route and blanked the page. In-page links now scroll, and unknown hashes fall back to the site.
 - New routes: `#/privacy` and `#/terms` (review drafts). Footer credits the founders.
-- Ship assets in `web/public/`: favicon, OG image, icons, manifest, sitemap, robots, `_headers`; `web/vercel.json` security headers; meta tags and founders JSON-LD in `web/index.html`.
+- Ship assets in `web/public/`: favicon, OG image, icons, manifest, sitemap, robots; `web/vercel.json` security headers; meta tags and founders JSON-LD in `web/index.html`.
 
 ### Content to confirm before launch
 - **Founders:** Chukwudi Hank (Founder/CEO, confirmed) and Ibrahim Musa (Co-founder/CTO, still a placeholder) — edit in `web/src/site/Glow.tsx`, the footer in `web/src/site/Site.tsx` and the JSON-LD in `web/index.html`.
