@@ -52,7 +52,7 @@ Everything in the demo is fictional: Riverbend Community Health Collective, thre
 - Ship assets in `web/public/`: favicon, OG image, icons, manifest, sitemap, robots, `_headers`; `web/vercel.json` security headers; meta tags and founders JSON-LD in `web/index.html`.
 
 ### Content to confirm before launch
-- **Founders are placeholders:** Ngozi Okafor (Founder/CEO) and Ibrahim Musa (Co-founder/CTO) — replace in `web/src/site/Glow.tsx`, the footer in `web/src/site/Site.tsx` and the JSON-LD in `web/index.html`.
+- **Founders:** Chukwudi Hank (Founder/CEO, confirmed) and Ibrahim Musa (Co-founder/CTO, still a placeholder) — edit in `web/src/site/Glow.tsx`, the footer in `web/src/site/Site.tsx` and the JSON-LD in `web/index.html`.
 - Contact email `hello@grantloom.site` is a placeholder — create the forward or replace it.
 - Statistics (Giving USA 2025) — re-check figures and links.
 - Privacy notice and terms need operator details and governing law.

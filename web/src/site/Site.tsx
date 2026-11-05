@@ -219,7 +219,7 @@ export default function Site() {
       <footer className="site-footer">
         <div className="wrap spread">
           <Logo light />
-          <span>© 2026 GrantLoom · grantloom.site · Founded by Ngozi Okafor (Founder/CEO) &amp; Ibrahim Musa (Co-founder/CTO) · <Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link>. All demo organizations, people and figures are fictional.</span>
+          <span>© 2026 GrantLoom · grantloom.site · Founded by Chukwudi Hank (Founder/CEO) &amp; Ibrahim Musa (Co-founder/CTO) · <Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link>. All demo organizations, people and figures are fictional.</span>
         </div>
       </footer>
       <style>{`@media (max-width: 860px){ #request .wrap{ grid-template-columns: 1fr !important; } }`}</style>
